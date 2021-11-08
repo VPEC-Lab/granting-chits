@@ -64,3 +64,47 @@ write.csv(merged_data, file = 'qualtrics-compfaces-merged-ids.csv')
 
 write.csv(full_study_id_list, file = 'full_study_id_list.csv')
 
+
+#### gorkem's approach ####
+
+#### X- SONA chits awards ####
+firstTimeSlot <- read.csv("sonaFirstTimeSlot.csv", header= TRUE)
+partPeopleHere <- unique(propRightAndDown.All$subNum)
+#write.csv(x=unique(propRightAndDown.All$subNum), file="participatedPeople.csv")
+
+#check each participant ID and see if there is a data of that here. 
+for (i in 1:nrow(firstTimeSlot)){
+  partIDonSONA <- firstTimeSlot$survey_id[i]
+  if (is.element(partIDonSONA, partPeopleHere)){
+    firstTimeSlot$dataYesOnMYSQL[i] <- 1 
+  }
+  else {
+    firstTimeSlot$dataYesOnMYSQL[i] <- 0 
+  }
+  if (firstTimeSlot$dataYesOnMYSQL[i] == 1 && firstTimeSlot$credit_type[i] =="Participated"){
+    firstTimeSlot$awardThisPerson[i] <- "awarded"
+  }
+  else if (firstTimeSlot$dataYesOnMYSQL[i] == 1 && firstTimeSlot$credit_type[i] =="Awaiting Action"){
+    firstTimeSlot$awardThisPerson[i] <- "should be awarded"
+  }
+  else if (firstTimeSlot$dataYesOnMYSQL[i] == 0 && firstTimeSlot$credit_type[i] =="Participated"){
+    firstTimeSlot$awardThisPerson[i] <- "should NOT be awarded"
+  }
+  else {
+    firstTimeSlot$awardThisPerson[i] <- "no"
+  }
+}
+
+
+write.csv(firstTimeSlot, file = "sonaFirstTimeSlot_processed.csv")
+#get me the "should be awarded people"
+awardThesePeople <- subset (firstTimeSlot, firstTimeSlot$awardThisPerson == "should be awarded")
+awardThesePeople$survey_id
+
+awardedButShouldntBe <- subset (firstTimeSlot, firstTimeSlot$awardThisPerson == "should NOT be awarded")
+awardedButShouldntBe$survey_id
+
+noShowPeep <- subset (firstTimeSlot, firstTimeSlot$awardThisPerson == "no")
+noShowPeep$survey_id
+
+#### 
